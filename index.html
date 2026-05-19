@@ -14,7 +14,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Roboto',sans-serif;background:var(--gray-bg);color:var(--dark-text);min-height:100vh;display:flex;}
-
+ 
   /* SIDEBAR */
   .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--white);border-right:1px solid var(--gray-border);display:flex;flex-direction:column;height:100vh;position:sticky;top:0;overflow:hidden;}
   .sidebar-header{background:var(--blue-main);color:white;padding:16px 18px;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
@@ -27,7 +27,7 @@
   .sidebar-body::-webkit-scrollbar-thumb{background:var(--gray-border);border-radius:4px;}
   .editor-panel{display:none;}
   .editor-panel.active{display:block;}
-
+ 
   /* FORM */
   .field-group{margin-bottom:12px;}
   .field-group label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--gray-text);margin-bottom:5px;}
@@ -49,7 +49,7 @@
   .input-sm:focus{border-color:var(--blue-mid);background:#fff;}
   .section-sep{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gray-text);margin:12px 0 7px;display:flex;align-items:center;gap:8px;}
   .section-sep::after{content:'';flex:1;height:1px;background:var(--gray-border);}
-
+ 
   /* CSV */
   .csv-drop-zone{border:2px dashed var(--blue-mid);border-radius:10px;padding:20px 14px;text-align:center;background:var(--blue-light);cursor:pointer;transition:all 0.2s;position:relative;margin-bottom:12px;}
   .csv-drop-zone:hover,.csv-drop-zone.drag-over{background:#d4e8f8;border-color:var(--blue-main);}
@@ -74,7 +74,7 @@
   .col-hint strong{color:var(--dark-text);}
   .col-select{width:100%;padding:6px 8px;border:1px solid var(--gray-border);border-radius:6px;font-size:12px;font-family:'Roboto',sans-serif;background:#f8f9fb;color:var(--dark-text);outline:none;margin-top:4px;display:none;}
   .col-select.visible{display:block;}
-
+ 
   /* MAIN */
   .main{flex:1;padding:24px 28px;overflow-y:auto;min-width:0;}
   .page-title{font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;color:var(--dark-text);margin-bottom:4px;}
@@ -91,7 +91,7 @@
 </style>
 </head>
 <body>
-
+ 
 <aside class="sidebar">
   <div class="sidebar-header">
     <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -104,7 +104,7 @@
     <button class="tab-btn" onclick="switchTab('donut',this)">Estado</button>
   </div>
   <div class="sidebar-body">
-
+ 
     <!-- CSV PANEL -->
     <div class="editor-panel active" id="editor-csv">
       <div class="section-sep">Importar archivo</div>
@@ -117,7 +117,7 @@
         <div class="csv-drop-text">Soltá el CSV aquí o hacé clic</div>
         <div class="csv-drop-sub">Separador automático: coma o punto y coma</div>
       </div>
-
+ 
       <div id="colPickerGroup" style="display:none;">
         <div class="field-group">
           <label>Columna de fecha</label>
@@ -128,21 +128,21 @@
           <select class="col-select visible" id="idColSelect" onchange="recomputeCSV()"></select>
         </div>
       </div>
-
+ 
       <div class="csv-status" id="csvStatus"></div>
-
+ 
       <div id="monthTableWrap" style="max-height:240px;overflow-y:auto;border:1px solid var(--gray-border);border-radius:8px;display:none;">
         <table class="month-table">
           <thead><tr><th>Mes</th><th style="text-align:right;">Trámites</th></tr></thead>
           <tbody id="monthTableBody"></tbody>
         </table>
       </div>
-
+ 
       <button class="apply-btn" id="applyBtn" onclick="applyCSVToStock()">
         ✔ Aplicar a Antigüedad del Stock
       </button>
     </div>
-
+ 
     <!-- STOCK PANEL -->
     <div class="editor-panel" id="editor-stock">
       <div class="section-sep">Puntos del gráfico</div>
@@ -155,7 +155,7 @@
       </div>
       <button class="update-btn" onclick="renderAll()">↻ Actualizar gráficos</button>
     </div>
-
+ 
     <!-- PROD PANEL -->
     <div class="editor-panel" id="editor-prod">
       <div class="section-sep">Barras semanales</div>
@@ -169,7 +169,7 @@
       </div>
       <button class="update-btn" onclick="renderAll()">↻ Actualizar gráficos</button>
     </div>
-
+ 
     <!-- DONUT PANEL -->
     <div class="editor-panel" id="editor-donut">
       <div class="section-sep">Segmentos</div>
@@ -183,15 +183,15 @@
       </div>
       <button class="update-btn" onclick="renderAll()">↻ Actualizar gráficos</button>
     </div>
-
+ 
   </div>
 </aside>
-
+ 
 <main class="main">
   <h1 class="page-title">Dashboard de Producción</h1>
   <p class="page-subtitle">Importá un CSV en la pestaña 📂 para llenar el Stock automáticamente · Editá cualquier valor manualmente en las otras pestañas</p>
   <div class="charts-grid">
-
+ 
     <div class="chart-card full-width">
       <div class="chart-title">Antigüedad del Stock</div>
       <div style="position:relative;height:300px;">
@@ -199,28 +199,39 @@
       </div>
       <p class="chart-note" id="stock-note-display">El mes con mayor cantidad de tramites pendientes es Marzo</p>
     </div>
-
+ 
     <div class="chart-card">
       <div class="chart-title">Producción Mensual</div>
       <div style="position:relative;height:280px;">
         <canvas id="chartProd" role="img" aria-label="Producción mensual por semana"></canvas>
       </div>
     </div>
-
-    <div class="chart-card">
-      <div class="donut-date" id="donut-date-display">Datos al 12.05</div>
+ 
+    <div class="chart-card" style="padding:22px 48px 22px 48px;">
+      <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-bottom:10px;">
+        <span style="font-size:12px;font-weight:600;color:var(--dark-text);">Datos al</span>
+        <input
+          id="donut-date-inline"
+          type="text"
+          value="12.05"
+          oninput="syncDonutDate(this.value)"
+          style="width:58px;padding:3px 7px;border:1px solid var(--gray-border);border-radius:6px;font-size:12px;font-weight:600;font-family:'Roboto',sans-serif;color:var(--blue-main);background:#f8f9fb;outline:none;text-align:center;"
+          onfocus="this.style.borderColor='var(--blue-mid)';this.style.background='#fff'"
+          onblur="this.style.borderColor='var(--gray-border)';this.style.background='#f8f9fb'"
+        >
+      </div>
       <div style="position:relative;">
-        <div style="position:relative;height:300px;">
+        <div style="position:relative;height:360px;">
           <canvas id="chartDonut" role="img" aria-label="Estado de producción"></canvas>
         </div>
-        <svg id="donut-svg" style="position:absolute;top:0;left:0;width:100%;height:300px;pointer-events:none;overflow:visible;"></svg>
+        <svg id="donut-svg" style="position:absolute;top:0;left:0;width:100%;height:360px;pointer-events:none;overflow:visible;"></svg>
       </div>
       <div class="legend-row" id="donut-legend"></div>
     </div>
-
+ 
   </div>
 </main>
-
+ 
 <script>
 // DATA
 let stockData=[
@@ -241,7 +252,7 @@ let donutData=[
 ];
 let chartStock,chartProd,chartDonut,csvParsed=null,csvMonthCounts={};
 const MONTH_NAMES={'01':'Enero','02':'Febrero','03':'Marzo','04':'Abril','05':'Mayo','06':'Junio','07':'Julio','08':'Agosto','09':'Septiembre','10':'Octubre','11':'Noviembre','12':'Diciembre'};
-
+ 
 // TABS
 function switchTab(id,btn){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -249,13 +260,13 @@ function switchTab(id,btn){
   btn.classList.add('active');
   document.getElementById('editor-'+id).classList.add('active');
 }
-
+ 
 // CSV
 const dz=document.getElementById('dropZone');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
 dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
 dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)handleCSVFile(f);});
-
+ 
 function handleCSVFile(file){
   if(!file)return;
   setStatus('loading','⏳ Leyendo archivo...');
@@ -263,7 +274,7 @@ function handleCSVFile(file){
   r.onload=e=>{try{parseCSV(e.target.result);}catch(err){setStatus('err','✗ Error: '+err.message);}};
   r.readAsText(file,'UTF-8');
 }
-
+ 
 function parseCSV(text){
   const firstLine=text.split('\n')[0];
   const sep=firstLine.includes(';')?';':',';
@@ -290,7 +301,7 @@ function parseCSV(text){
   document.getElementById('colPickerGroup').style.display='block';
   recomputeCSV();
 }
-
+ 
 function recomputeCSV(){
   if(!csvParsed)return;
   const{headers,rows}=csvParsed;
@@ -314,9 +325,9 @@ function recomputeCSV(){
   const e=errors>0?` · ${errors.toLocaleString()} filas sin fecha válida`:'';
   setStatus('ok',`✔ ${rows.length.toLocaleString('es-AR')} filas · ${sorted.length} meses · ${total.toLocaleString('es-AR')} trámites${e}`);
 }
-
+ 
 function setStatus(type,msg){const el=document.getElementById('csvStatus');el.className='csv-status '+type;el.textContent=msg;}
-
+ 
 function applyCSVToStock(){
   const sorted=Object.keys(csvMonthCounts).sort();
   if(!sorted.length)return;
@@ -333,7 +344,7 @@ function applyCSVToStock(){
   document.querySelector('[onclick*="stock"]').classList.add('active');
   document.getElementById('editor-stock').classList.add('active');
 }
-
+ 
 // BUILD ROWS
 function buildStockRows(){
   const c=document.getElementById('stock-rows');c.innerHTML='';
@@ -346,7 +357,7 @@ function buildStockRows(){
   });
 }
 function addStockRow(){stockData.push({label:'nuevo',val:0});buildStockRows();}
-
+ 
 function buildProdRows(){
   const c=document.getElementById('prod-rows');c.innerHTML='';
   prodData.forEach((d,i)=>{
@@ -358,7 +369,7 @@ function buildProdRows(){
   });
 }
 function addProdRow(){prodData.push({label:'nueva',val:0});buildProdRows();}
-
+ 
 function buildDonutRows(){
   const c=document.getElementById('donut-rows');c.innerHTML='';
   donutData.forEach((d,i)=>{
@@ -372,7 +383,7 @@ function buildDonutRows(){
   });
 }
 function addDonutRow(){donutData.push({label:'nuevo',val:0});buildDonutRows();}
-
+ 
 // CHARTS
 function renderStock(){
   document.getElementById('stock-note-display').textContent=document.getElementById('stock-note').value;
@@ -401,7 +412,7 @@ function renderStock(){
     }}]
   });
 }
-
+ 
 function renderProd(){
   const ymax=+document.getElementById('prod-ymax').value||130000;
   const labels=prodData.map(d=>d.label),vals=prodData.map(d=>d.val);
@@ -428,9 +439,18 @@ function renderProd(){
     }}]
   });
 }
-
+ 
+function syncDonutDate(val){
+  const sidebar=document.getElementById('donut-date');
+  if(sidebar) sidebar.value=val;
+  renderDonut();
+}
 function renderDonut(){
-  document.getElementById('donut-date-display').textContent='Datos al '+(document.getElementById('donut-date').value||'12.05');
+  const inlineEl=document.getElementById('donut-date-inline');
+  const sidebarEl=document.getElementById('donut-date');
+  const dateVal=(inlineEl&&inlineEl.value)||( sidebarEl&&sidebarEl.value)||'12.05';
+  if(inlineEl) inlineEl.value=dateVal;
+  if(sidebarEl) sidebarEl.value=dateVal;
   const total=donutData.reduce((s,d)=>s+(+d.val||0),0);
   const labels=donutData.map(d=>d.label),vals=donutData.map(d=>+d.val||0),colors=donutData.map((_,i)=>DC[i%DC.length]);
   if(chartDonut)chartDonut.destroy();
@@ -457,7 +477,7 @@ function renderDonut(){
   });
   buildDonutLegend(labels,vals,colors,total);
 }
-
+ 
 function drawDonutLabels(){
   const canvas=document.getElementById('chartDonut');
   const svg=document.getElementById('donut-svg');
@@ -468,7 +488,7 @@ function drawDonutLabels(){
   const meta=chartDonut.getDatasetMeta(0);
   const{chartArea:{left,right,top,bottom}}=chartDonut;
   const cx=(left+right)/2,cy=(top+bottom)/2;
-  const W=canvas.offsetWidth,H=canvas.offsetHeight;
+  const W=canvas.offsetWidth,H=canvas.offsetHeight||360;
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
   meta.data.forEach((arc,i)=>{
     const pct=(vals[i]/total)*100;if(pct<1.5)return;
@@ -493,7 +513,7 @@ function drawDonutLabels(){
     nv.textContent=Math.round(vals[i]).toLocaleString('es-AR');svg.appendChild(nv);
   });
 }
-
+ 
 function buildDonutLegend(labels,vals,colors,total){
   const leg=document.getElementById('donut-legend');leg.innerHTML='';
   labels.forEach((lbl,i)=>{
@@ -503,11 +523,20 @@ function buildDonutLegend(labels,vals,colors,total){
     leg.appendChild(item);
   });
 }
-
-function renderAll(){renderStock();renderProd();renderDonut();}
-
+ 
+function renderAll(){
+  renderStock();
+  renderProd();
+  // sync inline date from sidebar before rendering donut
+  const sidebarDate=document.getElementById('donut-date');
+  const inlineDate=document.getElementById('donut-date-inline');
+  if(sidebarDate&&inlineDate) inlineDate.value=sidebarDate.value;
+  renderDonut();
+}
+ 
 buildStockRows();buildProdRows();buildDonutRows();renderAll();
 window.addEventListener('resize',()=>setTimeout(drawDonutLabels,120));
 </script>
 </body>
 </html>
+ 
