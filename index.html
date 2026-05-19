@@ -493,8 +493,8 @@ function drawDonutLabels(){
     const pct=(vals[i]/total)*100;if(pct<1.5)return;
     const angle=(arc.startAngle+arc.endAngle)/2,outerR=arc.outerRadius;
     const x1=cx+Math.cos(angle)*outerR,y1=cy+Math.sin(angle)*outerR;
-    const x2=cx+Math.cos(angle)*(outerR+18),y2=cy+Math.sin(angle)*(outerR+18);
-    const x3=cx+Math.cos(angle)*(outerR+60),y3=cy+Math.sin(angle)*(outerR+60);
+    const x2=cx+Math.cos(angle)*(outerR+10),y2=cy+Math.sin(angle)*(outerR+10);
+    const x3=cx+Math.cos(angle)*(outerR+14),y3=cy+Math.sin(angle)*(outerR+14);
     const col=DC[i%DC.length],anchor=x3>cx?'start':'end';
     const line=document.createElementNS('http://www.w3.org/2000/svg','line');
     line.setAttribute('x1',x1);line.setAttribute('y1',y1);line.setAttribute('x2',x2);line.setAttribute('y2',y2);
