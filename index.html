@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard de Producción</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Roboto:wght@300;400;500&display=swap');
+  :root {
+    --blue-main:#1a6fb5; --blue-dark:#14538a; --blue-light:#e8f2fb; --blue-mid:#3a8fd4;
+    --gray-bg:#f4f6f8; --gray-border:#dde3ea; --gray-text:#6b7a8d; --dark-text:#1e2a38;
+    --white:#ffffff; --sidebar-w:330px; --green:#2e9e60; --green-light:#eaf6f0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Roboto',sans-serif;background:var(--gray-bg);color:var(--dark-text);min-height:100vh;display:flex;}
+
+  /* SIDEBAR */
+  .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--white);border-right:1px solid var(--gray-border);display:flex;flex-direction:column;height:100vh;position:sticky;top:0;overflow:hidden;}
+  .sidebar-header{background:var(--blue-main);color:white;padding:16px 18px;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .tab-nav{display:flex;border-bottom:1px solid var(--gray-border);flex-shrink:0;}
+  .tab-btn{flex:1;padding:9px 4px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;border:none;background:transparent;color:var(--gray-text);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;}
+  .tab-btn.active{color:var(--blue-main);border-bottom-color:var(--blue-main);background:var(--blue-light);}
+  .tab-btn:hover:not(.active){background:#f8f9fa;}
+  .sidebar-body{flex:1;overflow-y:auto;padding:14px;}
+  .sidebar-body::-webkit-scrollbar{width:4px;}
+  .sidebar-body::-webkit-scrollbar-thumb{background:var(--gray-border);border-radius:4px;}
+  .editor-panel{display:none;}
+  .editor-panel.active{display:block;}
+
+  /* FORM */
+  .field-group{margin-bottom:12px;}
+  .field-group label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--gray-text);margin-bottom:5px;}
+  .input-row{display:flex;align-items:center;gap:5px;margin-bottom:4px;background:#f8f9fb;border:1px solid var(--gray-border);border-radius:6px;padding:4px 8px;transition:border 0.15s;}
+  .input-row:focus-within{border-color:var(--blue-mid);background:#fff;}
+  .color-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .input-row input[type="text"]{flex:1.4;border:none;background:transparent;font-size:12px;color:var(--dark-text);font-family:'Roboto',sans-serif;min-width:0;outline:none;}
+  .input-row input[type="number"]{flex:1;border:none;background:transparent;font-size:12px;color:var(--blue-main);font-weight:500;font-family:'Roboto',sans-serif;text-align:right;min-width:0;outline:none;}
+  .del-btn{background:none;border:none;cursor:pointer;color:#ccc;font-size:15px;line-height:1;padding:0 2px;transition:color 0.15s;}
+  .del-btn:hover{color:#e24b4a;}
+  .add-btn{display:flex;align-items:center;gap:6px;width:100%;padding:6px 10px;font-size:11px;font-weight:600;color:var(--blue-main);background:var(--blue-light);border:1px dashed var(--blue-mid);border-radius:6px;cursor:pointer;margin-top:5px;transition:background 0.15s;}
+  .add-btn:hover{background:#d4e8f8;}
+  .update-btn{width:100%;padding:10px;background:var(--blue-main);color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;margin-top:14px;transition:background 0.2s,transform 0.1s;}
+  .update-btn:hover{background:var(--blue-dark);}
+  .update-btn:active{transform:scale(0.98);}
+  .input-text-full{width:100%;padding:7px 10px;border:1px solid var(--gray-border);border-radius:6px;font-size:12px;font-family:'Roboto',sans-serif;color:var(--dark-text);background:#f8f9fb;outline:none;resize:none;}
+  .input-text-full:focus{border-color:var(--blue-mid);background:#fff;}
+  .input-sm{padding:6px 10px;border:1px solid var(--gray-border);border-radius:6px;font-size:12px;font-family:'Roboto',sans-serif;background:#f8f9fb;color:var(--blue-main);font-weight:500;outline:none;width:100%;margin-top:4px;}
+  .input-sm:focus{border-color:var(--blue-mid);background:#fff;}
+  .section-sep{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gray-text);margin:12px 0 7px;display:flex;align-items:center;gap:8px;}
+  .section-sep::after{content:'';flex:1;height:1px;background:var(--gray-border);}
+
+  /* CSV */
+  .csv-drop-zone{border:2px dashed var(--blue-mid);border-radius:10px;padding:20px 14px;text-align:center;background:var(--blue-light);cursor:pointer;transition:all 0.2s;position:relative;margin-bottom:12px;}
+  .csv-drop-zone:hover,.csv-drop-zone.drag-over{background:#d4e8f8;border-color:var(--blue-main);}
+  .csv-drop-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+  .csv-drop-icon{font-size:28px;margin-bottom:6px;}
+  .csv-drop-text{font-size:12px;font-weight:600;color:var(--blue-main);}
+  .csv-drop-sub{font-size:10px;color:var(--gray-text);margin-top:3px;}
+  .csv-status{font-size:11px;padding:8px 10px;border-radius:6px;margin-bottom:10px;display:none;line-height:1.4;}
+  .csv-status.ok{background:var(--green-light);color:var(--green);border:1px solid #b2e0c8;display:block;font-weight:600;}
+  .csv-status.err{background:#fef0f0;color:#c0392b;border:1px solid #f5c6c6;display:block;font-weight:600;}
+  .csv-status.loading{background:var(--blue-light);color:var(--blue-main);border:1px solid #b0d4f0;display:block;font-weight:600;}
+  .month-table{width:100%;border-collapse:collapse;font-size:11px;}
+  .month-table th{background:#f0f5fb;color:var(--gray-text);font-weight:700;text-transform:uppercase;font-size:9px;letter-spacing:0.06em;padding:6px 8px;text-align:left;border-bottom:1px solid var(--gray-border);}
+  .month-table td{padding:5px 8px;border-bottom:1px solid #f0f2f5;}
+  .month-table tr:last-child td{border-bottom:none;}
+  .month-table .num{text-align:right;font-weight:600;color:var(--blue-main);font-variant-numeric:tabular-nums;}
+  .month-table tr:hover td{background:#f8f9fb;}
+  .apply-btn{width:100%;padding:9px;background:var(--green);color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;margin-top:10px;transition:background 0.2s;display:none;}
+  .apply-btn:hover{background:#247a4a;}
+  .apply-btn.visible{display:block;}
+  .col-hint{font-size:10px;color:var(--gray-text);background:#f8f9fb;border:1px solid var(--gray-border);border-radius:6px;padding:7px 9px;margin-bottom:10px;line-height:1.5;}
+  .col-hint strong{color:var(--dark-text);}
+  .col-select{width:100%;padding:6px 8px;border:1px solid var(--gray-border);border-radius:6px;font-size:12px;font-family:'Roboto',sans-serif;background:#f8f9fb;color:var(--dark-text);outline:none;margin-top:4px;display:none;}
+  .col-select.visible{display:block;}
+
+  /* MAIN */
+  .main{flex:1;padding:24px 28px;overflow-y:auto;min-width:0;}
+  .page-title{font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;color:var(--dark-text);margin-bottom:4px;}
+  .page-subtitle{font-size:12px;color:var(--gray-text);margin-bottom:20px;}
+  .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .chart-card{background:white;border-radius:14px;padding:22px;box-shadow:0 1px 4px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.04);}
+  .chart-card.full-width{grid-column:1/-1;}
+  .chart-title{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;text-align:center;text-transform:uppercase;letter-spacing:0.1em;color:var(--dark-text);margin-bottom:18px;}
+  .chart-note{text-align:center;font-size:13px;color:var(--gray-text);margin-top:12px;}
+  .donut-date{text-align:right;font-size:12px;font-weight:600;color:var(--dark-text);margin-bottom:8px;}
+  .legend-row{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;margin-top:14px;}
+  .legend-item{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--gray-text);}
+  .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+    Editor de gráficos
+  </div>
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('csv',this)">📂 CSV</button>
+    <button class="tab-btn" onclick="switchTab('stock',this)">Stock</button>
+    <button class="tab-btn" onclick="switchTab('prod',this)">Prod.</button>
+    <button class="tab-btn" onclick="switchTab('donut',this)">Estado</button>
+  </div>
+  <div class="sidebar-body">
+
+    <!-- CSV PANEL -->
+    <div class="editor-panel active" id="editor-csv">
+      <div class="section-sep">Importar archivo</div>
+      <div class="col-hint">
+        Cargá un <strong>.csv</strong> con trámites. Necesita una columna de <strong>fecha</strong> (AAAA-MM-DD) y opcionalmente una de <strong>ID</strong>. Se cuentan los registros por mes y se aplican al gráfico de Stock.
+      </div>
+      <div class="csv-drop-zone" id="dropZone">
+        <input type="file" id="csvFile" accept=".csv,.txt" onchange="handleCSVFile(this.files[0])">
+        <div class="csv-drop-icon">📄</div>
+        <div class="csv-drop-text">Soltá el CSV aquí o hacé clic</div>
+        <div class="csv-drop-sub">Separador automático: coma o punto y coma</div>
+      </div>
+
+      <div id="colPickerGroup" style="display:none;">
+        <div class="field-group">
+          <label>Columna de fecha</label>
+          <select class="col-select visible" id="dateColSelect" onchange="recomputeCSV()"></select>
+        </div>
+        <div class="field-group">
+          <label>Columna de ID <span style="font-weight:400;text-transform:none">(opcional)</span></label>
+          <select class="col-select visible" id="idColSelect" onchange="recomputeCSV()"></select>
+        </div>
+      </div>
+
+      <div class="csv-status" id="csvStatus"></div>
+
+      <div id="monthTableWrap" style="max-height:240px;overflow-y:auto;border:1px solid var(--gray-border);border-radius:8px;display:none;">
+        <table class="month-table">
+          <thead><tr><th>Mes</th><th style="text-align:right;">Trámites</th></tr></thead>
+          <tbody id="monthTableBody"></tbody>
+        </table>
+      </div>
+
+      <button class="apply-btn" id="applyBtn" onclick="applyCSVToStock()">
+        ✔ Aplicar a Antigüedad del Stock
+      </button>
+    </div>
+
+    <!-- STOCK PANEL -->
+    <div class="editor-panel" id="editor-stock">
+      <div class="section-sep">Puntos del gráfico</div>
+      <div class="field-group"><div id="stock-rows"></div>
+        <button class="add-btn" onclick="addStockRow()">＋ Agregar punto</button>
+      </div>
+      <div class="section-sep">Nota inferior</div>
+      <div class="field-group">
+        <textarea class="input-text-full" id="stock-note" rows="2">El mes con mayor cantidad de tramites pendientes es Marzo</textarea>
+      </div>
+      <button class="update-btn" onclick="renderAll()">↻ Actualizar gráficos</button>
+    </div>
+
+    <!-- PROD PANEL -->
+    <div class="editor-panel" id="editor-prod">
+      <div class="section-sep">Barras semanales</div>
+      <div class="field-group"><div id="prod-rows"></div>
+        <button class="add-btn" onclick="addProdRow()">＋ Agregar semana</button>
+      </div>
+      <div class="section-sep">Escala</div>
+      <div class="field-group">
+        <label>Máximo eje Y</label>
+        <input class="input-sm" type="number" id="prod-ymax" value="130000">
+      </div>
+      <button class="update-btn" onclick="renderAll()">↻ Actualizar gráficos</button>
+    </div>
+
+    <!-- DONUT PANEL -->
+    <div class="editor-panel" id="editor-donut">
+      <div class="section-sep">Segmentos</div>
+      <div class="field-group"><div id="donut-rows"></div>
+        <button class="add-btn" onclick="addDonutRow()">＋ Agregar segmento</button>
+      </div>
+      <div class="section-sep">Encabezado</div>
+      <div class="field-group">
+        <label>Fecha (ej: 12.05)</label>
+        <input class="input-sm" type="text" id="donut-date" value="12.05">
+      </div>
+      <button class="update-btn" onclick="renderAll()">↻ Actualizar gráficos</button>
+    </div>
+
+  </div>
+</aside>
+
+<main class="main">
+  <h1 class="page-title">Dashboard de Producción</h1>
+  <p class="page-subtitle">Importá un CSV en la pestaña 📂 para llenar el Stock automáticamente · Editá cualquier valor manualmente en las otras pestañas</p>
+  <div class="charts-grid">
+
+    <div class="chart-card full-width">
+      <div class="chart-title">Antigüedad del Stock</div>
+      <div style="position:relative;height:300px;">
+        <canvas id="chartStock" role="img" aria-label="Antigüedad del stock por mes"></canvas>
+      </div>
+      <p class="chart-note" id="stock-note-display">El mes con mayor cantidad de tramites pendientes es Marzo</p>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Producción Mensual</div>
+      <div style="position:relative;height:280px;">
+        <canvas id="chartProd" role="img" aria-label="Producción mensual por semana"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="donut-date" id="donut-date-display">Datos al 12.05</div>
+      <div style="position:relative;">
+        <div style="position:relative;height:300px;">
+          <canvas id="chartDonut" role="img" aria-label="Estado de producción"></canvas>
+        </div>
+        <svg id="donut-svg" style="position:absolute;top:0;left:0;width:100%;height:300px;pointer-events:none;overflow:visible;"></svg>
+      </div>
+      <div class="legend-row" id="donut-legend"></div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// DATA
+let stockData=[
+  {label:'2025-01',val:1},{label:'2025-02',val:1},{label:'2025-03',val:1},{label:'2025-04',val:1},
+  {label:'2025-05',val:3},{label:'2025-06',val:5},{label:'2025-07',val:4},{label:'2025-08',val:15},
+  {label:'2025-09',val:97},{label:'2025-10',val:261},{label:'2025-11',val:15093},{label:'2025-12',val:5010},
+  {label:'2026-01',val:32020},{label:'2026-02',val:59544},{label:'2026-03',val:86318},{label:'2026-04',val:61571}
+];
+let prodData=[
+  {label:'Sem3 Abril',val:115890},{label:'Sem4 Abril',val:100555},
+  {label:'Sem1 Mayo',val:96197},{label:'Sem2 Mayo',val:106173}
+];
+const DC=['#1e5f9e','#e07b3a','#2e9e60','#5b9bd5','#8ac3e8','#c465a8','#2d7d46','#888','#b85c38','#4a90d9'];
+let donutData=[
+  {label:'Cola de impresión',val:212799},{label:'Impresos',val:23743},
+  {label:'Cola de ensobrado',val:94488},{label:'Embalados',val:25661},
+  {label:'Verificados',val:22438},{label:'Ensobrados',val:18954},{label:'Egresados',val:23534}
+];
+let chartStock,chartProd,chartDonut,csvParsed=null,csvMonthCounts={};
+const MONTH_NAMES={'01':'Enero','02':'Febrero','03':'Marzo','04':'Abril','05':'Mayo','06':'Junio','07':'Julio','08':'Agosto','09':'Septiembre','10':'Octubre','11':'Noviembre','12':'Diciembre'};
+
+// TABS
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.editor-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('editor-'+id).classList.add('active');
+}
+
+// CSV
+const dz=document.getElementById('dropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)handleCSVFile(f);});
+
+function handleCSVFile(file){
+  if(!file)return;
+  setStatus('loading','⏳ Leyendo archivo...');
+  const r=new FileReader();
+  r.onload=e=>{try{parseCSV(e.target.result);}catch(err){setStatus('err','✗ Error: '+err.message);}};
+  r.readAsText(file,'UTF-8');
+}
+
+function parseCSV(text){
+  const firstLine=text.split('\n')[0];
+  const sep=firstLine.includes(';')?';':',';
+  const lines=text.trim().split('\n');
+  if(lines.length<2){setStatus('err','✗ Archivo vacío.');return;}
+  const headers=lines[0].split(sep).map(h=>h.trim().replace(/^"|"$/g,''));
+  const rows=[];
+  for(let i=1;i<lines.length;i++){
+    const cols=lines[i].split(sep).map(c=>c.trim().replace(/^"|"$/g,''));
+    if(cols.every(c=>c===''))continue;
+    const row={};headers.forEach((h,j)=>row[h]=cols[j]||'');rows.push(row);
+  }
+  csvParsed={headers,rows,sep};
+  const ds=document.getElementById('dateColSelect');
+  const is=document.getElementById('idColSelect');
+  ds.innerHTML=is.innerHTML='';
+  const dg=headers.findIndex(h=>/fecha|date|fec|dt|ingreso/i.test(h));
+  const ig=headers.findIndex(h=>/id|tramite|expediente|nro|numero/i.test(h));
+  headers.forEach((h,i)=>{
+    ds.innerHTML+=`<option value="${i}"${i===(dg>=0?dg:0)?' selected':''}>${h}</option>`;
+    is.innerHTML+=`<option value="${i}"${i===(ig>=0?ig:0)?' selected':''}>${h}</option>`;
+  });
+  is.innerHTML+=`<option value="-1">— Contar todas las filas</option>`;
+  document.getElementById('colPickerGroup').style.display='block';
+  recomputeCSV();
+}
+
+function recomputeCSV(){
+  if(!csvParsed)return;
+  const{headers,rows}=csvParsed;
+  const di=+document.getElementById('dateColSelect').value;
+  const counts={};let errors=0;
+  rows.forEach(row=>{
+    const raw=row[headers[di]]||'';
+    const m=raw.match(/(\d{4})[\/\-\.](\d{1,2})/);
+    if(!m){errors++;return;}
+    const key=`${m[1]}-${m[2].padStart(2,'0')}`;
+    counts[key]=(counts[key]||0)+1;
+  });
+  csvMonthCounts=counts;
+  const sorted=Object.keys(counts).sort();
+  const total=Object.values(counts).reduce((s,v)=>s+v,0);
+  const tb=document.getElementById('monthTableBody');
+  tb.innerHTML='';
+  sorted.forEach(m=>{tb.innerHTML+=`<tr><td>${m}</td><td class="num">${counts[m].toLocaleString('es-AR')}</td></tr>`;});
+  document.getElementById('monthTableWrap').style.display=sorted.length?'block':'none';
+  document.getElementById('applyBtn').classList.toggle('visible',sorted.length>0);
+  const e=errors>0?` · ${errors.toLocaleString()} filas sin fecha válida`:'';
+  setStatus('ok',`✔ ${rows.length.toLocaleString('es-AR')} filas · ${sorted.length} meses · ${total.toLocaleString('es-AR')} trámites${e}`);
+}
+
+function setStatus(type,msg){const el=document.getElementById('csvStatus');el.className='csv-status '+type;el.textContent=msg;}
+
+function applyCSVToStock(){
+  const sorted=Object.keys(csvMonthCounts).sort();
+  if(!sorted.length)return;
+  stockData=sorted.map(m=>({label:m,val:csvMonthCounts[m]}));
+  const maxM=sorted.reduce((a,b)=>csvMonthCounts[a]>csvMonthCounts[b]?a:b);
+  const mm=maxM.split('-')[1];
+  document.getElementById('stock-note').value='El mes con mayor cantidad de tramites pendientes es '+(MONTH_NAMES[mm]||maxM);
+  buildStockRows();renderStock();
+  const btn=document.getElementById('applyBtn');
+  btn.textContent='✔ ¡Aplicado!';btn.style.background='#247a4a';
+  setTimeout(()=>{btn.textContent='✔ Aplicar a Antigüedad del Stock';btn.style.background='';},1800);
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.editor-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('[onclick*="stock"]').classList.add('active');
+  document.getElementById('editor-stock').classList.add('active');
+}
+
+// BUILD ROWS
+function buildStockRows(){
+  const c=document.getElementById('stock-rows');c.innerHTML='';
+  stockData.forEach((d,i)=>{
+    const r=document.createElement('div');r.className='input-row';
+    r.innerHTML=`<input type="text" value="${d.label}" oninput="stockData[${i}].label=this.value">
+    <input type="number" value="${d.val}" oninput="stockData[${i}].val=+this.value">
+    <button class="del-btn" onclick="stockData.splice(${i},1);buildStockRows()">×</button>`;
+    c.appendChild(r);
+  });
+}
+function addStockRow(){stockData.push({label:'nuevo',val:0});buildStockRows();}
+
+function buildProdRows(){
+  const c=document.getElementById('prod-rows');c.innerHTML='';
+  prodData.forEach((d,i)=>{
+    const r=document.createElement('div');r.className='input-row';
+    r.innerHTML=`<input type="text" value="${d.label}" oninput="prodData[${i}].label=this.value">
+    <input type="number" value="${d.val}" oninput="prodData[${i}].val=+this.value">
+    <button class="del-btn" onclick="prodData.splice(${i},1);buildProdRows()">×</button>`;
+    c.appendChild(r);
+  });
+}
+function addProdRow(){prodData.push({label:'nueva',val:0});buildProdRows();}
+
+function buildDonutRows(){
+  const c=document.getElementById('donut-rows');c.innerHTML='';
+  donutData.forEach((d,i)=>{
+    const col=DC[i%DC.length];
+    const r=document.createElement('div');r.className='input-row';
+    r.innerHTML=`<span class="color-dot" style="background:${col}"></span>
+    <input type="text" value="${d.label}" oninput="donutData[${i}].label=this.value">
+    <input type="number" value="${d.val}" oninput="donutData[${i}].val=+this.value">
+    <button class="del-btn" onclick="donutData.splice(${i},1);buildDonutRows();renderAll()">×</button>`;
+    c.appendChild(r);
+  });
+}
+function addDonutRow(){donutData.push({label:'nuevo',val:0});buildDonutRows();}
+
+// CHARTS
+function renderStock(){
+  document.getElementById('stock-note-display').textContent=document.getElementById('stock-note').value;
+  const labels=stockData.map(d=>d.label),vals=stockData.map(d=>d.val);
+  if(chartStock)chartStock.destroy();
+  chartStock=new Chart(document.getElementById('chartStock'),{
+    type:'line',
+    data:{labels,datasets:[{data:vals,borderColor:'#1a6fb5',backgroundColor:'rgba(26,111,181,0.07)',
+      pointBackgroundColor:'#1a6fb5',pointBorderColor:'#fff',pointBorderWidth:2,
+      pointRadius:5,pointHoverRadius:7,tension:0.2,fill:true,borderWidth:2.5}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a6fb5',titleColor:'#fff',bodyColor:'rgba(255,255,255,0.85)',
+        callbacks:{label:ctx=>'  '+Math.round(ctx.parsed.y).toLocaleString('es-AR')}}},
+      scales:{
+        x:{ticks:{font:{size:10},color:'#9aaabb',maxRotation:45,autoSkip:false},grid:{display:false},border:{display:false}},
+        y:{ticks:{font:{size:10},color:'#9aaabb',callback:v=>v.toLocaleString('es-AR')},grid:{color:'rgba(0,0,0,0.05)'},border:{display:false}}
+      },layout:{padding:{top:28,right:18}}},
+    plugins:[{id:'dl',afterDatasetsDraw(chart){
+      const{ctx,data}=chart;
+      chart.getDatasetMeta(0).data.forEach((pt,i)=>{
+        const v=data.datasets[0].data[i];if(v===0)return;
+        ctx.save();ctx.font='600 10px Roboto,sans-serif';ctx.fillStyle='#1a6fb5';
+        ctx.textAlign='center';ctx.textBaseline='bottom';
+        ctx.fillText(Math.round(v).toLocaleString('es-AR'),pt.x,pt.y-7);ctx.restore();
+      });
+    }}]
+  });
+}
+
+function renderProd(){
+  const ymax=+document.getElementById('prod-ymax').value||130000;
+  const labels=prodData.map(d=>d.label),vals=prodData.map(d=>d.val);
+  if(chartProd)chartProd.destroy();
+  chartProd=new Chart(document.getElementById('chartProd'),{
+    type:'bar',
+    data:{labels,datasets:[{data:vals,backgroundColor:'#1a6fb5',hoverBackgroundColor:'#14538a',borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a6fb5',titleColor:'#fff',bodyColor:'rgba(255,255,255,0.85)',
+        callbacks:{label:ctx=>'  '+Math.round(ctx.parsed.y).toLocaleString('es-AR')}}},
+      scales:{
+        x:{ticks:{font:{size:12,weight:'500'},color:'#6b7a8d'},grid:{display:false},border:{display:false}},
+        y:{max:ymax,ticks:{font:{size:10},color:'#9aaabb',callback:v=>v.toLocaleString('es-AR')},grid:{color:'rgba(0,0,0,0.05)'},border:{display:false}}
+      },layout:{padding:{top:28,right:10}}},
+    plugins:[{id:'bl',afterDatasetsDraw(chart){
+      const{ctx,data}=chart;
+      chart.getDatasetMeta(0).data.forEach((bar,i)=>{
+        const v=data.datasets[0].data[i],bh=bar.base-bar.y;
+        ctx.save();ctx.textAlign='center';
+        if(bh>22){ctx.font='700 12px Nunito,sans-serif';ctx.fillStyle='white';ctx.textBaseline='middle';ctx.fillText(Math.round(v).toLocaleString('es-AR'),bar.x,bar.y+bh*0.5);}
+        else{ctx.font='700 11px Nunito,sans-serif';ctx.fillStyle='#1a6fb5';ctx.textBaseline='bottom';ctx.fillText(Math.round(v).toLocaleString('es-AR'),bar.x,bar.y-4);}
+        ctx.restore();
+      });
+    }}]
+  });
+}
+
+function renderDonut(){
+  document.getElementById('donut-date-display').textContent='Datos al '+(document.getElementById('donut-date').value||'12.05');
+  const total=donutData.reduce((s,d)=>s+(+d.val||0),0);
+  const labels=donutData.map(d=>d.label),vals=donutData.map(d=>+d.val||0),colors=donutData.map((_,i)=>DC[i%DC.length]);
+  if(chartDonut)chartDonut.destroy();
+  chartDonut=new Chart(document.getElementById('chartDonut'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:colors,hoverBackgroundColor:colors.map(c=>c+'dd'),borderWidth:3,borderColor:'#fff',hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'58%',
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(30,40,56,0.92)',titleColor:'#fff',bodyColor:'rgba(255,255,255,0.8)',
+        callbacks:{label:ctx=>{const p=((ctx.parsed/total)*100).toFixed(2);return ` ${ctx.label}: ${Math.round(ctx.parsed).toLocaleString('es-AR')} (${p}%)`;}}
+      }},
+      animation:{onComplete:()=>drawDonutLabels()}},
+    plugins:[{id:'ip',afterDatasetsDraw(chart){
+      const{ctx,chartArea:{left,right,top,bottom}}=chart;
+      const cx=(left+right)/2,cy=(top+bottom)/2;
+      chart.getDatasetMeta(0).data.forEach((arc,i)=>{
+        const pct=(vals[i]/total)*100;if(pct<3)return;
+        const angle=(arc.startAngle+arc.endAngle)/2,r=(arc.innerRadius+arc.outerRadius)/2;
+        const x=cx+Math.cos(angle)*r,y=cy+Math.sin(angle)*r;
+        ctx.save();ctx.font='bold 10px Nunito,sans-serif';ctx.fillStyle='#fff';
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(pct.toFixed(2)+'%',x,y);ctx.restore();
+      });
+    }}]
+  });
+  buildDonutLegend(labels,vals,colors,total);
+}
+
+function drawDonutLabels(){
+  const canvas=document.getElementById('chartDonut');
+  const svg=document.getElementById('donut-svg');
+  svg.innerHTML='';
+  if(!chartDonut)return;
+  const total=donutData.reduce((s,d)=>s+(+d.val||0),0);
+  const vals=donutData.map(d=>+d.val||0);
+  const meta=chartDonut.getDatasetMeta(0);
+  const{chartArea:{left,right,top,bottom}}=chartDonut;
+  const cx=(left+right)/2,cy=(top+bottom)/2;
+  const W=canvas.offsetWidth,H=canvas.offsetHeight;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  meta.data.forEach((arc,i)=>{
+    const pct=(vals[i]/total)*100;if(pct<1.5)return;
+    const angle=(arc.startAngle+arc.endAngle)/2,outerR=arc.outerRadius;
+    const x1=cx+Math.cos(angle)*outerR,y1=cy+Math.sin(angle)*outerR;
+    const x2=cx+Math.cos(angle)*(outerR+14),y2=cy+Math.sin(angle)*(outerR+14);
+    const x3=cx+Math.cos(angle)*(outerR+40),y3=cy+Math.sin(angle)*(outerR+40);
+    const col=DC[i%DC.length],anchor=x3>cx?'start':'end';
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',x1);line.setAttribute('y1',y1);line.setAttribute('x2',x2);line.setAttribute('y2',y2);
+    line.setAttribute('stroke',col);line.setAttribute('stroke-width','1.2');line.setAttribute('opacity','0.75');
+    svg.appendChild(line);
+    const nm=document.createElementNS('http://www.w3.org/2000/svg','text');
+    nm.setAttribute('x',x3);nm.setAttribute('y',y3-5);nm.setAttribute('font-size','8.5');
+    nm.setAttribute('font-family','Nunito,sans-serif');nm.setAttribute('font-weight','700');
+    nm.setAttribute('fill',col);nm.setAttribute('text-anchor',anchor);
+    nm.textContent=donutData[i].label;svg.appendChild(nm);
+    const nv=document.createElementNS('http://www.w3.org/2000/svg','text');
+    nv.setAttribute('x',x3);nv.setAttribute('y',y3+7);nv.setAttribute('font-size','8');
+    nv.setAttribute('font-family','Roboto,sans-serif');nv.setAttribute('fill','#6b7a8d');
+    nv.setAttribute('text-anchor',anchor);
+    nv.textContent=Math.round(vals[i]).toLocaleString('es-AR');svg.appendChild(nv);
+  });
+}
+
+function buildDonutLegend(labels,vals,colors,total){
+  const leg=document.getElementById('donut-legend');leg.innerHTML='';
+  labels.forEach((lbl,i)=>{
+    const pct=((vals[i]/total)*100).toFixed(2);
+    const item=document.createElement('span');item.className='legend-item';
+    item.innerHTML=`<span class="legend-dot" style="background:${colors[i]}"></span>${lbl}: <strong style="color:${colors[i]};margin-left:2px">${Math.round(vals[i]).toLocaleString('es-AR')} (${pct}%)</strong>`;
+    leg.appendChild(item);
+  });
+}
+
+function renderAll(){renderStock();renderProd();renderDonut();}
+
+buildStockRows();buildProdRows();buildDonutRows();renderAll();
+window.addEventListener('resize',()=>setTimeout(drawDonutLabels,120));
+</script>
+</body>
+</html>
