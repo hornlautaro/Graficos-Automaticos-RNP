@@ -454,9 +454,8 @@ function renderProd(){
       chart.getDatasetMeta(0).data.forEach((bar,i)=>{
         const v=data.datasets[0].data[i];
         ctx.save();ctx.textAlign='center';
-        ctx.font='700 13px Nunito,sans-serif';ctx.fillStyle='white';ctx.textBaseline='middle';
-        const bh=bar.base-bar.y;
-        ctx.fillText(Math.round(v).toLocaleString('es-AR'),bar.x,bar.y+bh*0.5);
+        ctx.font='700 13px Nunito,sans-serif';ctx.fillStyle='white';ctx.textBaseline='top';
+        ctx.fillText(Math.round(v).toLocaleString('es-AR'),bar.x,bar.y+10);
         ctx.restore();
       });
     }}]
