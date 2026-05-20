@@ -501,12 +501,12 @@ function drawDonutLabels(){
     line.setAttribute('stroke',col);line.setAttribute('stroke-width','1.2');line.setAttribute('opacity','0.75');
     svg.appendChild(line);
     const nm=document.createElementNS('http://www.w3.org/2000/svg','text');
-    nm.setAttribute('x',x3);nm.setAttribute('y',y3-5);nm.setAttribute('font-size','8.5');
+    nm.setAttribute('x',x3);nm.setAttribute('y',y3-5);nm.setAttribute('font-size','17');
     nm.setAttribute('font-family','Nunito,sans-serif');nm.setAttribute('font-weight','700');
     nm.setAttribute('fill',col);nm.setAttribute('text-anchor',anchor);
     nm.textContent=donutData[i].label;svg.appendChild(nm);
     const nv=document.createElementNS('http://www.w3.org/2000/svg','text');
-    nv.setAttribute('x',x3);nv.setAttribute('y',y3+7);nv.setAttribute('font-size','8');
+    nv.setAttribute('x',x3);nv.setAttribute('y',y3+7);nv.setAttribute('font-size','16');
     nv.setAttribute('font-family','Roboto,sans-serif');nv.setAttribute('fill','#6b7a8d');
     nv.setAttribute('text-anchor',anchor);
     nv.textContent=Math.round(vals[i]).toLocaleString('es-AR');svg.appendChild(nv);
